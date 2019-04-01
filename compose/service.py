@@ -1070,6 +1070,10 @@ class Service(object):
                 'Impossible to perform platform-targeted builds for API version < 1.35'
             )
 
+        cache_from = build_opts.get('cache_from', None)
+        if cache_from:
+            cache_from = [tag for tag in cache_from if tag]
+
         build_output = self.client.build(
             path=path,
             tag=self.image_name,
@@ -1078,7 +1082,7 @@ class Service(object):
             pull=pull,
             nocache=no_cache,
             dockerfile=build_opts.get('dockerfile', None),
-            cache_from=build_opts.get('cache_from', None),
+            cache_from=cache_from,
             labels=build_opts.get('labels', None),
             buildargs=build_args,
             network_mode=build_opts.get('network', None),
