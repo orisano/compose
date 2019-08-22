@@ -275,9 +275,6 @@ class TopLevelCommand(object):
         """
         service_names = options['SERVICE']
         build_args = options.get('--build-arg', None)
-        environment_file = options.get('--env-file')
-        environment = Environment.from_env_file(self.project_dir, environment_file)
-        native_builder = environment.get_boolean('COMPOSE_NATIVE_BUILDER')
         if build_args:
             if not service_names and docker.utils.version_lt(self.project.client.api_version, '1.25'):
                 raise UserError(
@@ -285,6 +282,8 @@ class TopLevelCommand(object):
                     ' Please use a Compose file version > 2.2 or specify which services to build.'
                 )
             build_args = resolve_build_args(build_args, self.toplevel_environment)
+
+        native_builder = self.toplevel_environment.get_boolean('COMPOSE_NATIVE_BUILDER')
 
         self.project.build(
             service_names=options['SERVICE'],
@@ -1075,6 +1074,8 @@ class TopLevelCommand(object):
         for excluded in [x for x in opts if options.get(x) and no_start]:
             raise UserError('--no-start and {} cannot be combined.'.format(excluded))
 
+        native_builder = self.toplevel_environment.get_boolean('COMPOSE_NATIVE_BUILDER')
+
         with up_shutdown_context(self.project, service_names, timeout, detached):
             warn_for_swarm_mode(self.project.client)
 
@@ -1094,6 +1095,7 @@ class TopLevelCommand(object):
                     reset_container_image=rebuild,
                     renew_anonymous_volumes=options.get('--renew-anon-volumes'),
                     silent=options.get('--quiet-pull'),
+                    cli=native_builder,
                 )
 
             try:

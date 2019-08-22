@@ -341,9 +341,9 @@ class Service(object):
             raise OperationFailedError("Cannot create container for service %s: %s" %
                                        (self.name, ex.explanation))
 
-    def ensure_image_exists(self, do_build=BuildAction.none, silent=False):
+    def ensure_image_exists(self, do_build=BuildAction.none, silent=False, cli=False):
         if self.can_be_built() and do_build == BuildAction.force:
-            self.build()
+            self.build(cli=cli)
             return
 
         try:
@@ -359,7 +359,7 @@ class Service(object):
         if do_build == BuildAction.skip:
             raise NeedsBuildError(self)
 
-        self.build()
+        self.build(cli=cli)
         log.warning(
             "Image for service {} was built because it did not already exist. To "
             "rebuild this image you must use `docker-compose build` or "
